@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pins For Dollars Club at The Armory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   UPDATE SCORES HERE ONLY — everything else calculates itself.
+   One number per week (0 = didn't bowl). 13 weeks per player.
+   ============================================================ */
+</style>
+<script>
+const LEAGUE = {
+  name: "Pins For Dollars Club at The Armory",
+  totalWeeks: 13,
+  entryFee: 25
+};
+const PLAYERS = [
+  { name: "Lucas Fields",   weeks: [301, 295, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { name: "Demi Fields",    weeks: [279, 326, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { name: "Brodie King",    weeks: [0,   339, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { name: "Chase Tucker",   weeks: [0,   172, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { name: "Patrick Wilson", weeks: [0,   0,   0, 916, 0,   0, 0, 0, 0, 0, 0, 0, 0] }
+];
+</script>
+<style>
+:root {
+  --olive: #1e2420;
+  --olive-deep: #131714;
+  --olive-line: #34413a;
+  --brass: #3f9150;
+  --brass-hi: #86d08c;
+  --brass-lo: #245a2f;
+  --tan: #ece0c2;
+  --tan-dim: #a9a184;
+  --signal: #c7392c;
+  --silver: #c9cdd2;
+  --bronze: #c07a3f;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --olive: #1e2420; --tan: #ece0c2; }
+}
+:root[data-theme="dark"] { --olive: #1e2420; --tan: #ece0c2; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--olive-deep);
+  color: var(--tan);
+  font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Fixed 1920x1080 stage, scaled to fit any TV */
+#stage {
+  width: 1920px; height: 1080px;
+  position: relative;
+  flex: none;
+  transform-origin: center center;
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(63,145,80,.10), transparent 55%),
+    repeating-linear-gradient(135deg, rgba(0,0,0,.08) 0 2px, transparent 2px 9px),
+    var(--olive);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 150px 1fr 76px;
+}
+
+/* ---------- HEADER ---------- */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 64px;
+  border-bottom: 4px solid var(--brass);
+  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.1));
+}
+.brand { display: flex; align-items: center; gap: 28px; }
+.brand svg { width: 92px; height: 92px; flex: none; }
+.brand h1 {
+  font-family: "Black Ops One", "Impact", "Arial Black", sans-serif;
+  font-weight: 400;
+  font-size: 54px; line-height: 1;
+  letter-spacing: 1px;
+  color: var(--tan);
+  text-shadow: 0 3px 0 rgba(0,0,0,.45);
+}
+.brand p { font-size: 30px; font-weight: 600; color: var(--brass); margin-top: 6px; letter-spacing: .5px; }
+
+.week-meter { text-align: right; }
+.week-meter .wk {
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-size: 54px; line-height: 1; color: var(--brass-hi);
+}
+.week-meter .wk small { font-size: 30px; color: var(--tan-dim); }
+.pips { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+.pips span { width: 22px; height: 10px; background: var(--olive-line); transform: skewX(-20deg); }
+.pips span.done { background: var(--brass); }
+.pips span.now { background: var(--signal); box-shadow: 0 0 12px var(--signal); }
+
+/* ---------- MAIN ---------- */
+main {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  gap: 40px;
+  padding: 32px 64px 28px;
+  min-height: 0;
+}
+
+/* Board */
+.board { display: flex; flex-direction: column; min-height: 0; }
+.board-head, .row {
+  display: grid;
+  grid-template-columns: 96px 1fr 520px 150px;
+  align-items: center;
+  column-gap: 24px;
+}
+.board-head {
+  font-size: 22px; font-weight: 700; color: var(--tan-dim);
+  padding: 0 24px 10px; letter-spacing: .5px;
+}
+.board-head .weeks-h { display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; text-align: center; }
+.board-head .weeks-h span.now { color: var(--signal); }
+.board-head .tot-h { text-align: right; }
+
+.rows { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+.row {
+  position: relative;
+  padding: 0 24px;
+  background: rgba(0,0,0,.28);
+  border-left: 8px solid var(--olive-line);
+  clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 50%, calc(100% - 26px) 100%, 0 100%);
+  opacity: 0; transform: translateX(-40px);
+  animation: deploy .6s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.row.r1 { border-left-color: var(--brass); background: linear-gradient(90deg, rgba(63,145,80,.28), rgba(0,0,0,.25) 60%); }
+.row.r2 { border-left-color: var(--silver); }
+.row.r3 { border-left-color: var(--bronze); }
+@keyframes deploy { to { opacity: 1; transform: none; } }
+
+/* Brass casing progress bar behind each row */
+.casing {
+  position: absolute; left: 0; bottom: 0; height: 6px;
+  background: linear-gradient(90deg, var(--brass-lo), var(--brass) 70%, var(--brass-hi));
+  border-radius: 0 6px 6px 0;
+  width: 0;
+  transition: width 1.4s cubic-bezier(.2,.8,.2,1) .4s;
+}
+
+.insignia { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.insignia .pos {
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-size: 44px; line-height: 1; color: var(--tan);
+}
+.r1 .insignia .pos { color: var(--brass-hi); }
+.insignia svg { height: 22px; width: auto; }
+
+.who { min-width: 0; }
+.who .name {
+  font-size: 46px; font-weight: 800; line-height: 1.05;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.who .title { font-size: 24px; font-weight: 600; color: var(--brass); display: flex; gap: 14px; align-items: center; }
+.move { font-weight: 700; font-size: 22px; }
+.move.up { color: #7fc27a; }
+.move.down { color: #e0766b; }
+
+.weeks { display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; }
+.cell {
+  height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(236,224,194,.10);
+  color: var(--tan-dim);
+}
+.cell.hit { background: rgba(63,145,80,.16); color: var(--tan); border-color: rgba(63,145,80,.45); }
+.cell.best { background: var(--brass); color: var(--olive-deep); border-color: var(--brass-hi); }
+.cell.now { outline: 2px solid var(--signal); outline-offset: -2px; }
+.cell.empty::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(236,224,194,.18); }
+
+.total { text-align: right; padding-right: 22px; }
+.total b {
+  display: block;
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-weight: 400; font-size: 58px; line-height: 1; color: var(--tan);
+}
+.r1 .total b { color: var(--brass-hi); }
+.total span { white-space: nowrap; font-size: 20px; color: var(--tan-dim); font-weight: 600; }
+
+/* ---------- SIDE ---------- */
+aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+
+.champ {
+  position: relative;
+  flex: none;
+  padding: 20px 28px 20px;
+  background:
+    linear-gradient(160deg, rgba(134,208,140,.25), rgba(36,90,47,.15) 60%),
+    var(--olive-deep);
+  border: 3px solid var(--brass);
+  overflow: hidden;
+}
+.champ::before {
+  content: ""; position: absolute; inset: 8px;
+  border: 1px dashed rgba(63,145,80,.5); pointer-events: none;
+}
+.champ .lbl { font-size: 26px; font-weight: 700; color: var(--brass-hi); display: flex; align-items: center; gap: 10px; }
+.champ .lbl svg { width: 30px; height: 30px; }
+.champ .cname {
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-size: 44px; line-height: 1.1; margin: 8px 0 4px; color: var(--tan);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.champ .cstat { font-size: 25px; line-height: 1.2; font-weight: 600; color: var(--tan-dim); }
+.champ .cstat b { color: var(--brass-hi); font-weight: 800; }
+
+.medals { display: flex; flex-direction: column; gap: 10px; flex: none; }
+.medal {
+  display: grid; grid-template-columns: 50px 1fr auto; align-items: center; gap: 16px;
+  padding: 10px 20px;
+  background: rgba(0,0,0,.3);
+  border-left: 5px solid var(--brass);
+}
+.medal svg { width: 50px; height: 50px; }
+.medal .m-name { font-size: 20px; font-weight: 700; color: var(--brass); }
+.medal .m-who { font-size: 28px; font-weight: 800; line-height: 1.1; color: var(--tan); }
+.medal .m-note { font-size: 18px; color: var(--tan-dim); font-weight: 600; }
+.medal .m-val {
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-size: 38px; color: var(--brass-hi);
+}
+
+.enlist {
+  margin-top: auto;
+  flex: none;
+  position: relative;
+  padding: 18px 28px 22px;
+  background: var(--signal);
+  color: #fff6e6;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+}
+.enlist h2 {
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-weight: 400; font-size: 42px; line-height: 1;
+}
+.enlist p { font-size: 24px; font-weight: 600; margin-top: 8px; line-height: 1.25; }
+.enlist p b { font-weight: 800; color: #fff; }
+.enlist .fee {
+  position: absolute; right: 26px; top: 18px;
+  font-family: "Black Ops One", "Impact", sans-serif;
+  font-size: 64px; line-height: 1; color: #fff; opacity: .95;
+}
+.enlist .pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.06); } }
+
+/* ---------- TICKER ---------- */
+.ticker {
+  display: flex; align-items: center;
+  background: var(--olive-deep);
+  border-top: 4px solid var(--brass);
+  overflow: hidden; position: relative;
+}
+.ticker .tag {
+  flex: none; height: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 30px;
+  background: var(--brass); color: var(--olive-deep);
+  font-family: "Black Ops One", "Impact", sans-serif; font-size: 30px;
+  z-index: 2;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 24px) 100%, 0 100%);
+  padding-right: 48px;
+}
+.ticker .tag i { width: 14px; height: 14px; border-radius: 50%; background: var(--signal); }
+.track { position: relative; flex: 1; height: 100%; }
+.track span {
+  position: absolute; left: 40px; right: 40px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 36px; font-weight: 700; color: var(--tan);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transition: opacity .8s ease;
+}
+.track span.on { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .row { animation: none; opacity: 1; transform: none; }
+  .enlist .pulse { animation: none; }
+  .track span { transition: none; }
+  .casing { transition: none; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <header>
+    <div class="brand">
+      <!-- Pin-as-round emblem -->
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#3f9150" stroke-width="4"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="#3f9150" stroke-width="1.5" stroke-dasharray="3 4"/>
+        <path d="M50 14c-6 0-8 6-8 11 0 5 3 8 3 12-4 5-9 12-9 22 0 12 5 21 7 27h14c2-6 7-15 7-27 0-10-5-17-9-22 0-4 3-7 3-12 0-5-2-11-8-11z" fill="#ece0c2"/>
+        <rect x="44" y="33" width="12" height="3" fill="#c7392c"/>
+        <rect x="44" y="38" width="12" height="3" fill="#c7392c"/>
+      </svg>
+      <div>
+        <h1 id="leagueName">Pins For Dollars Club at The Armory</h1>
+        <p>Season standings. Every pin counts toward the final tally.</p>
+      </div>
+    </div>
+    <div class="week-meter">
+      <div class="wk" id="weekLabel">Week 1 <small>of 13</small></div>
+      <div class="pips" id="pips"></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="board">
+      <div class="board-head">
+        <span>Rank</span>
+        <span>Bowler</span>
+        <div class="weeks-h" id="weeksHead"></div>
+        <span class="tot-h">Total pins</span>
+      </div>
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <aside>
+      <div class="champ">
+        <div class="lbl">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#86d08c" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>
+          Top Gun
+        </div>
+        <div class="cname" id="champName">—</div>
+        <div class="cstat" id="champStat"></div>
+      </div>
+
+      <div class="medals" id="medals"></div>
+
+      <div class="enlist">
+        <div class="fee pulse">$<span id="fee">25</span></div>
+        <h2>Enlist now</h2>
+        <p>Grab a lane and join the club.<br>Members get <b>25% off bowling</b> during league play.<br>Ask the front desk to sign up.</p>
+      </div>
+    </aside>
+  </main>
+
+  <div class="ticker">
+    <div class="tag"><i></i>Lane report</div>
+    <div class="track" id="track"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const W = LEAGUE.totalWeeks;
+  const titles = ["General", "Colonel", "Major", "Captain", "Lieutenant", "Sergeant", "Corporal", "Private"];
+
+  // --- Calculations ---
+  const players = PLAYERS.map(p => {
+    const weeks = Array.from({ length: W }, (_, i) => Number(p.weeks[i]) || 0);
+    const bowled = weeks.filter(v => v > 0);
+    const total = bowled.reduce((a, b) => a + b, 0);
+    const best = bowled.length ? Math.max(...bowled) : 0;
+    return { name: p.name, weeks, total, best, played: bowled.length, avg: bowled.length ? total / bowled.length : 0 };
+  });
+
+  let currentWeek = 0;
+  players.forEach(p => p.weeks.forEach((v, i) => { if (v > 0 && i + 1 > currentWeek) currentWeek = i + 1; }));
+  if (currentWeek === 0) currentWeek = 1;
+
+  const rankBy = arr => [...arr].sort((a, b) => b.total - a.total || b.best - a.best || a.name.localeCompare(b.name));
+  const ranked = rankBy(players);
+
+  // Movement vs. standings before the current week
+  const prev = rankBy(players.map(p => ({ ...p, total: p.weeks.slice(0, currentWeek - 1).reduce((a, b) => a + b, 0) })));
+  const prevPos = {}; prev.forEach((p, i) => prevPos[p.name] = i + 1);
+
+  // --- Header ---
+  document.getElementById("leagueName").textContent = LEAGUE.name;
+  document.getElementById("fee").textContent = LEAGUE.entryFee;
+  document.getElementById("weekLabel").innerHTML = `Week ${currentWeek} <small>of ${W}</small>`;
+  document.getElementById("pips").innerHTML = Array.from({ length: W }, (_, i) =>
+    `<span class="${i + 1 < currentWeek ? "done" : i + 1 === currentWeek ? "now" : ""}"></span>`).join("");
+  document.getElementById("weeksHead").innerHTML = Array.from({ length: W }, (_, i) =>
+    `<span class="${i + 1 === currentWeek ? "now" : ""}">W${i + 1}</span>`).join("");
+
+  // --- Insignia ---
+  const star = (x, fill) => `<path transform="translate(${x} 0)" fill="${fill}" d="M11 0l2.6 7.3H21l-6 4.6 2.3 7.4L11 14.8 4.7 19.3 7 11.9 1 7.3h7.4z"/>`;
+  const chevron = (y) => `<path transform="translate(0 ${y})" fill="none" stroke="#3f9150" stroke-width="3.2" d="M2 8 L14 1 L26 8"/>`;
+  function insignia(pos) {
+    if (pos <= 3) {
+      const fill = ["#86d08c", "#c9cdd2", "#c07a3f"][pos - 1];
+      const n = 4 - pos;
+      return `<svg viewBox="0 0 ${n * 22} 20">${Array.from({ length: n }, (_, i) => star(i * 22, fill)).join("")}</svg>`;
+    }
+    const n = Math.max(0, 7 - pos);
+    if (!n) return `<svg viewBox="0 0 28 10"><rect x="4" y="3" width="20" height="4" fill="#245a2f"/></svg>`;
+    return `<svg viewBox="0 0 28 ${6 + n * 6}">${Array.from({ length: n }, (_, i) => chevron(2 + i * 6)).join("")}</svg>`;
+  }
+
+  // --- Rows ---
+  const leaderTotal = ranked[0]?.total || 1;
+  const rowsEl = document.getElementById("rows");
+  const rowH = Math.min(104, Math.floor((760 - (ranked.length - 1) * 12) / Math.max(ranked.length, 1)));
+  rowsEl.innerHTML = ranked.map((p, i) => {
+    const pos = i + 1;
+    const delta = currentWeek > 1 ? (prevPos[p.name] - pos) : 0;
+    const move = delta > 0 ? `<span class="move up">▲ ${delta}</span>` : delta < 0 ? `<span class="move down">▼ ${-delta}</span>` : "";
+    const cells = p.weeks.map((v, w) => {
+      const cls = ["cell", v > 0 ? "hit" : "empty", v > 0 && v === p.best && p.played > 1 ? "best" : "", w + 1 === currentWeek ? "now" : ""].join(" ");
+      return `<div class="${cls}">${v > 0 ? v : ""}</div>`;
+    }).join("");
+    return `
+      <div class="row r${pos}" style="height:${rowH}px; animation-delay:${.15 + i * .12}s">
+        <div class="insignia"><span class="pos">${pos}</span>${insignia(pos)}</div>
+        <div class="who">
+          <div class="name">${p.name}</div>
+          <div class="title">${titles[Math.min(i, titles.length - 1)]} ${move}</div>
+        </div>
+        <div class="weeks">${cells}</div>
+        <div class="total"><b>${p.total}</b><span>${p.played} ${p.played === 1 ? "week" : "weeks"}</span></div>
+        <div class="casing" data-w="${(p.total / leaderTotal) * 100}"></div>
+      </div>`;
+  }).join("");
+  requestAnimationFrame(() => setTimeout(() => {
+    document.querySelectorAll(".casing").forEach(c => c.style.width = c.dataset.w + "%");
+  }, 50));
+
+  // --- Champion ---
+  const lead = ranked[0], second = ranked[1];
+  if (lead) {
+    document.getElementById("champName").textContent = lead.name;
+    document.getElementById("champStat").innerHTML = second
+      ? `<b>${lead.total}</b> pins, holding a <b>${lead.total - second.total}</b>-pin lead over ${second.name}`
+      : `<b>${lead.total}</b> pins`;
+  }
+
+  // --- Awards ---
+  let deadeye = null;
+  players.forEach(p => p.weeks.forEach((v, w) => { if (!deadeye || v > deadeye.v) deadeye = { p, v, w: w + 1 }; }));
+
+  const veterans = players.filter(p => p.played >= 2);
+  const ironArm = (veterans.length ? veterans : players).slice().sort((a, b) => b.avg - a.avg)[0];
+
+  let climber = null;
+  players.forEach(p => {
+    const b = p.weeks.filter(v => v > 0);
+    for (let i = 1; i < b.length; i++) {
+      const jump = b[i] - b[i - 1];
+      if (jump > 0 && (!climber || jump > climber.jump)) climber = { p, jump };
+    }
+  });
+
+  const icon = {
+    deadeye: `<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#3f9150" stroke-width="3"/><circle cx="30" cy="30" r="16" fill="none" stroke="#3f9150" stroke-width="3"/><circle cx="30" cy="30" r="6" fill="#c7392c"/><path d="M30 0v14M30 46v14M0 30h14M46 30h14" stroke="#ece0c2" stroke-width="3"/></svg>`,
+    iron: `<svg viewBox="0 0 60 60"><path d="M30 4l22 8v16c0 14-10 24-22 28C18 52 8 42 8 28V12z" fill="rgba(63,145,80,.2)" stroke="#3f9150" stroke-width="3"/><circle cx="30" cy="30" r="10" fill="#ece0c2"/><circle cx="27" cy="27" r="2" fill="#131714"/><circle cx="33" cy="27" r="2" fill="#131714"/><circle cx="30" cy="33" r="2" fill="#131714"/></svg>`,
+    climb: `<svg viewBox="0 0 60 60"><path d="M8 48 L30 30 L52 48" fill="none" stroke="#3f9150" stroke-width="5"/><path d="M8 34 L30 16 L52 34" fill="none" stroke="#86d08c" stroke-width="5"/><path d="M8 20 L30 2 L52 20" fill="none" stroke="#c7392c" stroke-width="5" opacity=".9"/></svg>`
+  };
+  const medals = [];
+  if (deadeye && deadeye.v > 0) medals.push(`<div class="medal">${icon.deadeye}<div><div class="m-name">Deadeye</div><div class="m-who">${deadeye.p.name}</div><div class="m-note">Highest single week, Week ${deadeye.w}</div></div><div class="m-val">${deadeye.v}</div></div>`);
+  if (ironArm && ironArm.played) medals.push(`<div class="medal">${icon.iron}<div><div class="m-name">Iron Arm</div><div class="m-who">${ironArm.name}</div><div class="m-note">Best weekly average</div></div><div class="m-val">${Math.round(ironArm.avg)}</div></div>`);
+  if (climber) medals.push(`<div class="medal">${icon.climb}<div><div class="m-name">Rising Rank</div><div class="m-who">${climber.p.name}</div><div class="m-note">Biggest week-over-week jump</div></div><div class="m-val">+${climber.jump}</div></div>`);
+  document.getElementById("medals").innerHTML = medals.join("");
+
+  // --- Ticker ---
+  const lines = [
+    `Enlist for $${LEAGUE.entryFee} at the front desk and start stacking pins`,
+    lead ? `${lead.name} holds the top spot with ${lead.total} pins` : "",
+    deadeye && deadeye.v ? `Deadeye of the season so far: ${deadeye.p.name} with ${deadeye.v} in Week ${deadeye.w}` : "",
+    `${W - currentWeek} weeks left to climb the ranks`,
+    `Late to the fight? Every week you bowl adds to your total`,
+    second && lead ? `${second.name} is ${lead.total - second.total} pins from taking command` : ""
+  ].filter(Boolean);
+  const track = document.getElementById("track");
+  track.innerHTML = lines.map((l, i) => `<span class="${i === 0 ? "on" : ""}">${l}</span>`).join("");
+  const spans = track.querySelectorAll("span");
+  let t = 0;
+  setInterval(() => {
+    spans[t].classList.remove("on");
+    t = (t + 1) % spans.length;
+    spans[t].classList.add("on");
+  }, 7000);
+
+  // --- Scale stage to any screen ---
+  const stage = document.getElementById("stage");
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.transform = `scale(${s})`;
+  }
+  window.addEventListener("resize", fit); fit();
+
+  // Ask the device not to sleep while the board is on screen (supported browsers only)
+  let lock = null;
+  async function keepAwake() {
+    try { if ("wakeLock" in navigator) lock = await navigator.wakeLock.request("screen"); } catch (e) {}
+  }
+  keepAwake();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
+  document.addEventListener("click", keepAwake, { once: true });
+
+  // Refresh every 10 minutes so updated scores show on the TV without touching it
+  setTimeout(() => location.reload(), 10 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
