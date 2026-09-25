@@ -62,9 +62,10 @@ body {
 /* Fixed 1920x1080 stage, scaled to fit any TV */
 #stage {
   width: 1920px; height: 1080px;
-  position: relative;
+  position: fixed; left: 50%; top: 50%;
   flex: none;
   transform-origin: center center;
+  transform: translate(-50%, -50%);
   background:
     radial-gradient(ellipse at 70% 0%, rgba(63,145,80,.10), transparent 55%),
     repeating-linear-gradient(135deg, rgba(0,0,0,.08) 0 2px, transparent 2px 9px),
@@ -488,12 +489,22 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
   }, 7000);
 
   // --- Scale stage to any screen ---
+  // Optional manual size tweak: add ?zoom=0.9 (smaller) or ?zoom=1.05 (bigger) to the link
+  const zoom = parseFloat(new URLSearchParams(location.search).get("zoom")) || 1;
   const stage = document.getElementById("stage");
   function fit() {
-    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-    stage.style.transform = `scale(${s})`;
+    const vw = (window.visualViewport && window.visualViewport.width) || document.documentElement.clientWidth || window.innerWidth;
+    const vh = (window.visualViewport && window.visualViewport.height) || document.documentElement.clientHeight || window.innerHeight;
+    if (!vw || !vh) return;
+    const s = Math.min(vw / 1920, vh / 1080) * zoom;
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
-  window.addEventListener("resize", fit); fit();
+  fit();
+  window.addEventListener("resize", fit);
+  window.addEventListener("load", fit);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", fit);
+  [250, 1000, 3000].forEach(t => setTimeout(fit, t));
+  setInterval(fit, 30000);
 
   // Ask the device not to sleep while the board is on screen (supported browsers only)
   let lock = null;
