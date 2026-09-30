@@ -19,14 +19,13 @@ const LEAGUE = {
   totalWeeks: 13,
   entryFee: 25
 };
-  const PLAYERS = [
+const PLAYERS = [
   { name: "Lucas Fields",      weeks: [326, 295, 0, 0,   0,   0, 0, 0, 0, 0, 0, 0, 0] },
   { name: "Demi Fields",       weeks: [279, 326, 0, 0,   0,   0, 0, 0, 0, 0, 0, 0, 0] },
   { name: "Brodie King",       weeks: [0,   339, 0, 0,   0,   0, 0, 0, 0, 0, 0, 0, 0] },
   { name: "Chase Tucker",      weeks: [0,   172, 0, 0,   0,   0, 0, 0, 0, 0, 0, 0, 0] },
   { name: "Michelle Beckmann", weeks: [0,   0,   0, 0,   324, 0, 0, 0, 0, 0, 0, 0, 0] },
   { name: "Patrick Wilson",    weeks: [0,   0,   0, 916, 0,   0, 0, 0, 0, 0, 0, 0, 0] },
-];
 ];
 </script>
 <style>
@@ -431,6 +430,17 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
         <div class="casing" data-w="${(p.total / leaderTotal) * 100}"></div>
       </div>`;
   }).join("");
+  // Shrink any long name until it fits on one line
+  function fitNames() {
+    document.querySelectorAll(".row .name, .champ .cname").forEach(n => {
+      n.style.fontSize = "";
+      let size = parseFloat(getComputedStyle(n).fontSize);
+      while (n.scrollWidth > n.clientWidth && size > 24) { size -= 1; n.style.fontSize = size + "px"; }
+    });
+  }
+  fitNames();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+  setTimeout(fitNames, 1500);
   requestAnimationFrame(() => setTimeout(() => {
     document.querySelectorAll(".casing").forEach(c => c.style.width = c.dataset.w + "%");
   }, 50));
