@@ -17,7 +17,8 @@
 const LEAGUE = {
   name: "Pins For Dollars Club at The Armory",
   totalWeeks: 13,
-  entryFee: 25
+  entryFee: 25,
+  grandPrize: 1000
 };
 const PLAYERS = [
   { name: "Lucas Fields",      weeks: [326, 295, 0, 0,   0,   0,   0, 0, 0, 0, 0, 0, 0] },
@@ -74,6 +75,7 @@ body {
   overflow: hidden;
   display: grid;
   grid-template-rows: 150px 1fr 76px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* ---------- HEADER ---------- */
@@ -93,9 +95,11 @@ header {
   color: var(--tan);
   text-shadow: 0 3px 0 rgba(0,0,0,.45);
 }
-.brand p { font-size: 30px; font-weight: 600; color: var(--brass); margin-top: 6px; letter-spacing: .5px; }
+.brand { min-width: 0; flex: 1; margin-right: 40px; }
+.brand > div { min-width: 0; flex: 1; }
+.brand p { white-space: nowrap; overflow: hidden; font-size: 30px; font-weight: 600; color: var(--brass); margin-top: 6px; letter-spacing: .5px; }
 
-.week-meter { text-align: right; }
+.week-meter { text-align: right; flex: none; }
 .week-meter .wk {
   font-family: "Black Ops One", "Impact", sans-serif;
   font-size: 54px; line-height: 1; color: var(--brass-hi);
@@ -197,7 +201,7 @@ main {
 .total span { white-space: nowrap; font-size: 20px; color: var(--tan-dim); font-weight: 600; }
 
 /* ---------- SIDE ---------- */
-aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+aside { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 
 .champ {
   position: relative;
@@ -254,6 +258,7 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
 }
 .enlist p { font-size: 24px; font-weight: 600; margin-top: 8px; line-height: 1.25; }
 .enlist p b { font-weight: 800; color: #fff; }
+.enlist p b.prize { display: block; font-size: 30px; line-height: 1.15; margin-bottom: 6px; }
 .enlist .fee {
   position: absolute; right: 26px; top: 18px;
   font-family: "Black Ops One", "Impact", sans-serif;
@@ -312,7 +317,7 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
       </svg>
       <div>
         <h1 id="leagueName">Pins For Dollars Club at The Armory</h1>
-        <p>Season standings. Every pin counts toward the final tally.</p>
+        <p id="subline">Season standings. Every pin counts toward the final tally.</p>
       </div>
     </div>
     <div class="week-meter">
@@ -347,7 +352,7 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
       <div class="enlist">
         <div class="fee pulse">$<span id="fee">25</span></div>
         <h2>Enlist now</h2>
-        <p>Grab a lane and join the club.<br>Members get <b>25% off bowling</b> during league play.<br>Ask the front desk to sign up.</p>
+        <p><b class="prize" id="prizeLine"></b>Grab a lane and join the club.<br>Members get <b>25% off bowling</b> during league play.<br>Ask the front desk to sign up.</p>
       </div>
     </aside>
   </main>
@@ -386,6 +391,11 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
   // --- Header ---
   document.getElementById("leagueName").textContent = LEAGUE.name;
   document.getElementById("fee").textContent = LEAGUE.entryFee;
+  const prize = LEAGUE.grandPrize ? "$" + LEAGUE.grandPrize.toLocaleString("en-US") : "";
+  if (prize) {
+    document.getElementById("subline").textContent = `Season standings. Every pin counts toward the final tally. ${prize} grand prize to the top bowler.`;
+    document.getElementById("prizeLine").textContent = `Top bowler wins ${prize}`;
+  }
   document.getElementById("weekLabel").innerHTML = `Week ${currentWeek} <small>of ${W}</small>`;
   document.getElementById("pips").innerHTML = Array.from({ length: W }, (_, i) =>
     `<span class="${i + 1 < currentWeek ? "done" : i + 1 === currentWeek ? "now" : ""}"></span>`).join("");
@@ -432,7 +442,7 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
   }).join("");
   // Shrink any long name until it fits on one line
   function fitNames() {
-    document.querySelectorAll(".row .name, .champ .cname").forEach(n => {
+    document.querySelectorAll(".row .name, .champ .cname, #subline").forEach(n => {
       n.style.fontSize = "";
       let size = parseFloat(getComputedStyle(n).fontSize);
       while (n.scrollWidth > n.clientWidth && size > 24) { size -= 1; n.style.fontSize = size + "px"; }
@@ -482,11 +492,14 @@ aside { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
   document.getElementById("medals").innerHTML = medals.join("");
 
   // --- Ticker ---
+  // Lead change this week? Announce it first.
+  const newLeader = lead && second && currentWeek > 1 && prevPos[lead.name] !== 1;
   const lines = [
+    newLeader ? `${lead.name} takes command! Now leading ${second.name} by ${lead.total - second.total} pins` : "",
     `Enlist for $${LEAGUE.entryFee} at the front desk and start stacking pins`,
     lead ? `${lead.name} holds the top spot with ${lead.total} pins` : "",
     deadeye && deadeye.v ? `Deadeye of the season so far: ${deadeye.p.name} with ${deadeye.v} in Week ${deadeye.w}` : "",
-    `${W - currentWeek} weeks left to climb the ranks`,
+    prize ? `${prize} grand prize on the line. ${W - currentWeek} weeks left to claim it` : `${W - currentWeek} weeks left to climb the ranks`,
     `Late to the fight? Every week you bowl adds to your total`,
     second && lead ? `${second.name} is ${lead.total - second.total} pins from taking command` : ""
   ].filter(Boolean);
