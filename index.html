@@ -18,7 +18,7 @@ const LEAGUE = {
   name: "Pins For Dollars Club at The Armory",
   totalWeeks: 13,
   entryFee: 25,
-  grandPrize: 1000
+  grandPrize: 0   // set to a dollar amount (e.g. 1000) to show a prize; 0 hides it
 };
 const PLAYERS = [
   { name: "Lucas Fields",      weeks: [326, 295, 0, 0,   0,   0,   0, 0, 0, 0, 0, 0, 0] },
@@ -258,6 +258,7 @@ aside { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 }
 .enlist p { font-size: 24px; font-weight: 600; margin-top: 8px; line-height: 1.25; }
 .enlist p b { font-weight: 800; color: #fff; }
+.enlist p b.prize:empty { display: none; }
 .enlist p b.prize { display: block; font-size: 30px; line-height: 1.15; margin-bottom: 6px; }
 .enlist .fee {
   position: absolute; right: 26px; top: 18px;
